@@ -5,9 +5,13 @@ Projet Universitaire au compte de la matière NFP103 (Applications Concurrentes:
 Plan de base:
 
 a) Phase de recherches
+=
 b) Développement de l'interface graphique
+=
 c) Développement côté serveur
+=
 d) Développement côté client
+=
 e) Tests fonctionnels et ajustements nécessaires (Partie majeure)
 
 # Plan provisoire, sujet à des modifications
