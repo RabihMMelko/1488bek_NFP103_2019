@@ -13,6 +13,7 @@ c) Développement côté serveur
 d) Développement côté client
 =
 e) Tests fonctionnels et ajustements nécessaires (Partie majeure)
+=
 
 # Plan provisoire, sujet à des modifications
 # Début du travail estimé vers début Février 2019 (meilleur des cas)
