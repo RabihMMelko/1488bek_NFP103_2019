@@ -6,14 +6,16 @@ Plan de base:
 
 a) Phase de recherches
 =
-b) Développement de l'interface graphique
+b) Développement côté serveur
 =
-c) Développement côté serveur
+c) Développement côté client
 =
-d) Développement côté client
+d) Tests fonctionnels et ajustements nécessaires (Partie majeure)
 =
-e) Tests fonctionnels et ajustements nécessaires (Partie majeure)
+e) Développement de l'interface graphique
 =
 
-# Plan provisoire, sujet à des modifications
+
+# Plan provisoire, sujet à des modifications.
+# Test seront effectués sur Kali (à travers Virtualbox), en attente de reconfiguration WSL
 # Début du travail estimé vers début Février 2019 (meilleur des cas)
