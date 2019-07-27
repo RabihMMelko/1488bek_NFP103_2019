@@ -12,10 +12,7 @@ c) Développement côté client
 =
 d) Tests fonctionnels et ajustements nécessaires (Partie majeure)
 =
-e) Développement de l'interface graphique
-=
+
 
 
 # Plan provisoire, sujet à des modifications.
-# Test seront effectués sur Kali (à travers Virtualbox), en attente de reconfiguration WSL
-# Début du travail estimé vers début Février 2019 (meilleur des cas)
