@@ -73,7 +73,7 @@ public class UserThread extends Thread {
     }
  
     /**
-     * Sends a list of online users to the newly connected user.
+     * _who
      */
     void printUsers() {
         if (server.hasUsers()) {
@@ -84,7 +84,7 @@ public class UserThread extends Thread {
     }
  
     /**
-     * Sends a message to the client.
+     * Message
      */
     void sendMessage(String message) {
         writer.println(message);
