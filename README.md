@@ -15,4 +15,4 @@ d) Tests fonctionnels et ajustements nécessaires (Partie majeure)
 
 
 
-# Plan provisoire, sujet à des modifications.
+Plan provisoire, sujet à des modifications.
