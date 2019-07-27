@@ -4,7 +4,8 @@
  * and open the template in the editor.
  */
 
-package ACCOV;
+
+package ACCOV2019;
 
 /**
  *
@@ -12,43 +13,90 @@ package ACCOV;
  * @date $(date)
  */
 
-import java.io.*; //Pour la gestion des E/S
-import java.util.*; 
-import java.net.*; //Pour la gestion des reseaux
-
+import java.io.*;
+import java.net.*;
+import java.util.*;
+ 
 
 public class Server {
-   static ArrayList<Client> activeUsers = new ArrayList<Client>();
-   
-   public static void main(String [] args) throws IOException{
-        ServerSocket ss; 
-       
-     
-        ss = new ServerSocket(1234); //Initialization de la Socket Serveur: Ecoute sur le port 1234
-        Socket s; 
-          
-        //Boucle infinie pour les requêtes client
-        while (true)  
-        { 
-            //Accepter la requête client
-            s = ss.accept(); 
-            
-            //Obtention des flux de données IN/OUT
-            
-            DataInputStream cdis = new DataInputStream(s.getInputStream());
-            DataOutputStream cdos = new DataOutputStream(s.getOutputStream());
-            
-            //Creation d'une instance client, ainsi que son Thread dedié
-            Client cli = new Client (s,"Client"+activeUsers.size(),cdis,cdos);
-            
-            Thread session = new Thread(cli);
-            
-            //Ajout du client à la liste des utilisateurs actifs
-            
-            activeUsers.add(cli);
-            
-            //Demarrage de session
-            session.start();
-                    }
-}
+    private int port;
+    private Set<String> userNames = new HashSet<>();
+    private Set<UserThread> userThreads = new HashSet<>();
+ 
+    public Server(int port) {
+        this.port = port;
+    }
+ 
+    public void execute() {
+        try (ServerSocket serverSocket = new ServerSocket(port)) {
+ 
+            System.out.println("Chat Server is listening on port " + port);
+ 
+            while (true) {
+                Socket socket = serverSocket.accept();
+                System.out.println("New user connected");
+ 
+                UserThread newUser = new UserThread(socket, this);
+                userThreads.add(newUser);
+                newUser.start();
+ 
+            }
+ 
+        } catch (IOException ex) {
+            System.out.println("Error in the server: " + ex.getMessage());
+            ex.printStackTrace();
+        }
+    }
+ 
+    public static void main(String[] args) {
+        if (args.length < 1) {
+            System.out.println("Syntax: java ChatServer <port-number>");
+            System.exit(0);
+        }
+ 
+        int port = Integer.parseInt(args[0]);
+ 
+        Server server = new Server(port);
+        server.execute();
+    }
+ 
+    /**
+     * Delivers a message from one user to others (broadcasting)
+     */
+    void broadcast(String message, UserThread excludeUser) {
+        for (UserThread aUser : userThreads) {
+            if (aUser != excludeUser) {
+                aUser.sendMessage(message);
+            }
+        }
+    }
+ 
+    /**
+     * Stores username of the newly connected client.
+     */
+    void addUserName(String userName) {
+        userNames.add(userName);
+    }
+ 
+    /**
+     * When a client is disconneted, removes the associated username and UserThread
+     */
+    void removeUser(String userName, UserThread aUser) {
+        boolean removed = userNames.remove(userName);
+        if (removed) {
+            userThreads.remove(aUser);
+            System.out.println("The user " + userName + " quitted");
+        }
+    }
+ 
+    Set<String> getUserNames() {
+        return this.userNames;
+    }
+ 
+    /**
+     * Returns true if there are other users connected (not count the currently connected user)
+     */
+    boolean hasUsers() {
+        return !this.userNames.isEmpty();
+    }
 }
