@@ -31,7 +31,7 @@ public class WriteThread extends Thread {
             OutputStream output = socket.getOutputStream();
             writer = new PrintWriter(output, true);
         } catch (IOException ex) {
-            System.out.println("Error getting output stream: " + ex.getMessage());
+            System.out.println("Erreur obtention flux sortant: " + ex.getMessage());
             ex.printStackTrace();
         }
     }
@@ -40,8 +40,7 @@ public class WriteThread extends Thread {
  
         Console console = System.console();
  
-        String userName = console.readLine("\nEnter your name: ");
-        client.setUserName(userName);
+        String userName = client.getUserName();
         writer.println(userName);
  
         String text;
@@ -56,7 +55,7 @@ public class WriteThread extends Thread {
             socket.close();
         } catch (IOException ex) {
  
-            System.out.println("Error writing to server: " + ex.getMessage());
+            System.out.println("Erreur ecriture au serveur: " + ex.getMessage());
         }
     }
 }
