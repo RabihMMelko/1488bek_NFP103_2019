@@ -13,6 +13,7 @@ package ACCOV2019;
  */
 import java.net.*;
 import java.io.*;
+import java.util.Scanner;
  
 
 public class Client {
@@ -29,15 +30,18 @@ public class Client {
         try {
             Socket socket = new Socket(hostname, port);
  
-            System.out.println("Connected to the chat server");
+            System.out.println("Connecté au serveur");
  
-            new ReadThread(socket, this).start();
-            new WriteThread(socket, this).start();
+            ReadThread rt = new ReadThread(socket, this);
+            WriteThread wt = new WriteThread(socket, this);
+            
+            rt.setName(userName); wt.setName(userName);
+            rt.start(); wt.start();
  
         } catch (UnknownHostException ex) {
-            System.out.println("Server not found: " + ex.getMessage());
+            System.out.println("Serveur inexistant: " + ex.getMessage());
         } catch (IOException ex) {
-            System.out.println("I/O Error: " + ex.getMessage());
+            System.out.println("Erreur E/S: " + ex.getMessage());
         }
  
     }
@@ -49,19 +53,38 @@ public class Client {
     String getUserName() {
         return this.userName;
     }
+    
+    public void kick(){
+        System.exit(0);
+    }
  
  
     public static void main(String[] args) {
-        if (args.length < 2){
-        
-            System.out.println("Syntax: Client localhost port");
-            System.exit(0);
-        }
- 
-        String hostname = args[0];
-        int port = Integer.parseInt(args[1]);
+        Scanner in = new Scanner(System.in); 
+     System.out.println("Bienvenue. Pour commencer, veuillez vous connecter en utilisant la commande ci-dessous\n _connect <surnom> <machine> <port>");
+     String init = in.nextLine();
+     while(!init.startsWith("_connect")){
+       System.out.println("Commande invalide. Usage: _connect <surnom> <machine> <port>");
+       init = in.nextLine();
+     }
+     String[] connection = init.split(" ");
+     
+     while(connection.length < 4){
+       System.out.println("Commande invalide. Usage: _connect <surnom> <machine> <port>");
+       connection = in.nextLine().split(" ");
+     }
+     
+     while (Integer.parseInt(connection[3]) <= 1023){
+         System.out.println("Veuillez ne pas utiliser un port reservé. Pour cela, utiliser un numero de port supérieur à 1024");
+         connection[3] = Integer.toString(in.nextInt());
+     }
+     
+     int port =  Integer.parseInt(connection[3]);
+     String hostname = connection[2];
+     
  
         Client client = new Client(hostname, port);
+        client.setUserName(connection[1]);
         client.execute();
     }
 }
