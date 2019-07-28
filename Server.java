@@ -14,56 +14,85 @@ package ACCOV2019;
 
 import java.io.*;
 import java.net.*;
+import java.text.SimpleDateFormat;
 import java.util.*;
  
 
 public class Server {
-    private int port;
+    private final int port;
     private Set<String> userNames = new HashSet<>();
-    private Set<UserThread> userThreads = new HashSet<>();
+    private HashMap<String, UserThread> userThreads = new HashMap<>();
+    private final Scanner in = new Scanner(System.in);
  
     public Server(int port) {
         this.port = port;
     }
+    
+    public Scanner getScanner(){
+      return this.in;
+    }
+    
+    
+    
+    public HashMap<String, UserThread> getUserThreads(){
+      return this.userThreads;
+    }
+    
+    public UserThread getClientThread(String s){
+      return this.userThreads.get(s);
+    }
  
-    public void execute() {
+    public void execute() throws InterruptedException {
         try (ServerSocket serverSocket = new ServerSocket(port)) {
  
-            System.out.println("Chat Server is listening on port " + port);
- 
+            System.out.println("Serveur operationnel sur le port " + port);
             while (true) {
+                
+                synchronized(userNames){
+                  if (userNames.size() >= 10){
+                    System.out.println("Desolé, pas de place disponible");
+                  }
+                }
+                
                 Socket socket = serverSocket.accept();
-                System.out.println("New user connected");
- 
+                
                 UserThread newUser = new UserThread(socket, this);
-                userThreads.add(newUser);
                 newUser.start();
+                newUser.wait();
+                System.out.println("[ANNONCE]"+newUser.getName()+" est connecté");
+                broadcast("[ANNONCE]"+newUser.getName()+" est connecté", null);
  
             }
  
         } catch (IOException ex) {
-            System.out.println("Error in the server: " + ex.getMessage());
+            System.out.println("Erreur sur le serveur: " + ex.getMessage());
             ex.printStackTrace();
         }
     }
  
     public static void main(String[] args) {
         if (args.length < 1) {
-            System.out.println("Syntax: java ChatServer <port-number>");
+            System.out.println("Syntaxe: java -cp .. ACCOV2019.Server <port-number>");
             System.exit(0);
         }
  
         int port = Integer.parseInt(args[0]);
  
         Server server = new Server(port);
+        try{
         server.execute();
+        }
+        catch(InterruptedException e){e.printStackTrace();}
     }
  
     /**
      * Fonction de broadcast
      */
     void broadcast(String message, UserThread excludeUser) {
-        for (UserThread aUser : userThreads) {
+        for (Map.Entry<String, UserThread> entry : userThreads.entrySet()) {
+            String usN = entry.getKey();
+            UserThread aUser = entry.getValue();
+            
             if (aUser != excludeUser) {
                 aUser.sendMessage(message);
             }
@@ -71,7 +100,7 @@ public class Server {
     }
  
     /**
-     * Stores username of the newly connected client.
+     * Ajout de l'utilisateur.
      */
     void addUserName(String userName) {
         userNames.add(userName);
@@ -84,12 +113,12 @@ public class Server {
         boolean removed = userNames.remove(userName);
         if (removed) {
             userThreads.remove(aUser);
-            
             System.out.println("L'utilisateur " + userName + " a quitté");
+            broadcast("L'utilisateur " + userName + " a quitté", null);
         }
     }
  
-    Set<String> getUserNames() {
+    public Set<String> getUserNames() {
         return this.userNames;
     }
  
