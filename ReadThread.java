@@ -33,14 +33,17 @@ public class ReadThread extends Thread {
             InputStream input = socket.getInputStream();
             reader = new BufferedReader(new InputStreamReader(input));
         } catch (IOException ex) {
-            System.out.println("Error getting input stream: " + ex.getMessage());
+            System.out.println("Erreur obtention flux entrant: " + ex.getMessage());
             ex.printStackTrace();
         }
     }
  
     public void run() {
+        
         while (true) {
             try {
+                
+                
                 String response = reader.readLine();
                 System.out.println("\n" + response);
  
@@ -51,7 +54,7 @@ public class ReadThread extends Thread {
                     System.out.print("["+dateFormat.format(date)+"][" + client.getUserName() + "]: ");
                 }
             } catch (IOException ex) {
-                System.out.println("Error reading from server: " + ex.getMessage());
+                System.out.println("Erreur lecture du server: " + ex.getMessage());
                 ex.printStackTrace();
                 break;
             }
