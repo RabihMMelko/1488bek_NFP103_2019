@@ -13,15 +13,14 @@ package ACCOV2019;
  */
 import java.io.*;
 import java.net.*;
-import java.util.*;
 import java.util.Date;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
  
 
 public class UserThread extends Thread {
-    private Socket socket;
-    private Server server;
+    private final Socket socket;
+    private final Server server;
     private PrintWriter writer;
  
     public UserThread(Socket socket, Server server) {
@@ -29,6 +28,7 @@ public class UserThread extends Thread {
         this.server = server;
     }
  
+    @Override
     public void run() {
         try {
             InputStream input = socket.getInputStream();
@@ -37,17 +37,20 @@ public class UserThread extends Thread {
             OutputStream output = socket.getOutputStream();
             writer = new PrintWriter(output, true);
  
-            String userName = reader.readLine();
+            String userName = new String(reader.readLine());
+            this.setName(userName);
             server.addUserName(userName);
+            server.getUserThreads().put(userName, this);
             
             DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
             Date date = new Date();
             String serverMessage = "["+dateFormat.format(date)+"]Un nouveau utilisateur s'est connecté : " + userName;
             server.broadcast(serverMessage, this);
- 
+            
             String clientMessage;
  
             do {
+                
                 clientMessage = reader.readLine();
                 if (clientMessage.equals("_who")){
                   printUsers();
@@ -63,17 +66,16 @@ public class UserThread extends Thread {
             socket.close();
             
             
-            serverMessage = "["+dateFormat.format(date)+"]"+userName + " has quit.";
+            serverMessage = "["+dateFormat.format(date)+"]"+userName + " a quitté.";
             server.broadcast(serverMessage, this);
  
         } catch (IOException ex) {
-            System.out.println("Error in UserThread: " + ex.getMessage());
-            ex.printStackTrace();
+            System.out.println("Erreur dans UserThread: " + ex.getMessage());
         }
     }
  
     /**
-     * _who
+     * Liste des utilisateurs connectés (_who)
      */
     void printUsers() {
         if (server.hasUsers()) {
@@ -84,7 +86,7 @@ public class UserThread extends Thread {
     }
  
     /**
-     * Message
+     * Sends a message to the client.
      */
     void sendMessage(String message) {
         writer.println(message);
