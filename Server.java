@@ -14,6 +14,7 @@ package ACCOV2019;
 
 import java.io.*;
 import java.net.*;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
  
@@ -43,11 +44,15 @@ public class Server {
     }
  
     public void execute() throws InterruptedException {
+        
+        
+        System.out.println("Serveur operationnel sur le port " + port);
+        
+        ServerThread s = new ServerThread(this);
+        s.start();
         try (ServerSocket serverSocket = new ServerSocket(port)) {
  
-            System.out.println("Serveur operationnel sur le port " + port);
             while (true) {
-                
                 synchronized(userNames){
                   if (userNames.size() >= 10){
                     System.out.println("Desolé, pas de place disponible");
@@ -58,10 +63,10 @@ public class Server {
                 
                 UserThread newUser = new UserThread(socket, this);
                 newUser.start();
-                newUser.wait();
                 System.out.println("[ANNONCE]"+newUser.getName()+" est connecté");
                 broadcast("[ANNONCE]"+newUser.getName()+" est connecté", null);
- 
+                
+               
             }
  
         } catch (IOException ex) {
@@ -110,6 +115,7 @@ public class Server {
      * Retrait de l'utilisateur et thread associé lors de la deconnexion
      */
     void removeUser(String userName, UserThread aUser) {
+        aUser.sendMessage("Vous avez été déconnectés par le serveur >:Ds");
         boolean removed = userNames.remove(userName);
         if (removed) {
             userThreads.remove(aUser);
@@ -128,4 +134,54 @@ public class Server {
     boolean hasUsers() {
         return !this.userNames.isEmpty();
     }
+    
+    void printUsers() {
+        if (this.hasUsers()) {
+            System.out.println("Utilisateurs connectés: " + this.getUserNames());
+        } else {
+            System.out.println("Aucun utilisateur connecté");
+        }
+    }
+    private class ServerThread extends Thread{
+    private BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+    private Server serv;
+
+        public ServerThread(Server s) {
+           this.serv = s;
+        }
+    
+    
+
+    public void run() {
+
+        while (true) {
+            try{
+            String cmd = reader.readLine();
+            
+            if (cmd.equals("_who")){serv.printUsers();}
+            if(cmd.equals("_shutdown")){
+              serv.broadcast("Le serveur va vous déconnecter.",null);
+              for(Map.Entry<String, UserThread> entry : userThreads.entrySet()){
+                 serv.removeUser(entry.getKey(), entry.getValue());
+              }
+              System.exit(0);
+            }
+            if(cmd.startsWith("_kill")){
+              String user = cmd.split(" ")[1];
+              if(serv.userNames.contains(user)){
+              UserThread at = userThreads.get(user);
+              serv.removeUser(user, at);
+              serv.broadcast("L'utilisateur "+user+" a été déconnecté. Hourrah!", at);
+              at.getSocket().close();
+              }
+              else{
+                System.out.println("Cet utilisateur n'existe pas");
+              }
+            }
+            }
+            catch(IOException e){e.printStackTrace();}
+
+        }
+    }
+  }
 }
