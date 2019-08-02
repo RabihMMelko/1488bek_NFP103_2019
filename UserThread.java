@@ -27,10 +27,13 @@ public class UserThread extends Thread {
         this.socket = socket;
         this.server = server;
     }
+    
+    public Socket getSocket(){return this.socket;}
  
     @Override
     public void run() {
         try {
+            
             InputStream input = socket.getInputStream();
             BufferedReader reader = new BufferedReader(new InputStreamReader(input));
  
@@ -41,6 +44,7 @@ public class UserThread extends Thread {
             this.setName(userName);
             server.addUserName(userName);
             server.getUserThreads().put(userName, this);
+            
             
             DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
             Date date = new Date();
@@ -58,7 +62,9 @@ public class UserThread extends Thread {
                 dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
                 date = new Date();
                 serverMessage = "["+dateFormat.format(date)+"][" + userName + "]: " + clientMessage;
-                server.broadcast(serverMessage, this);
+                if(!clientMessage.startsWith("_")){
+                    server.broadcast(serverMessage, this);
+                }
  
             } while (!clientMessage.equals("_quit"));
  
@@ -70,7 +76,7 @@ public class UserThread extends Thread {
             server.broadcast(serverMessage, this);
  
         } catch (IOException ex) {
-            System.out.println("Erreur dans UserThread: " + ex.getMessage());
+            
         }
     }
  
