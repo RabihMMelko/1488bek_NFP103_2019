@@ -47,7 +47,9 @@ public class WriteThread extends Thread {
  
         do {
             text = console.readLine("[" + userName + "]: ");
+            
             writer.println(text);
+            
  
         } while (!text.equals("_quit"));
  
